@@ -64,6 +64,14 @@ impl Database {
         self.users.values().find(|user| user.username == user_name)
     }
 
+    fn get_users(&self) -> Vec<&User> {
+        self.users.values().collect()
+    }
+
+    fn delete_user(&mut self, user_id: &u64) {
+        self.users.remove(user_id);
+    }
+
     // Database methods
     fn save_to_file(&self) -> std::io::Result<()> {
         // convert the current database(self) to string type
@@ -91,7 +99,7 @@ struct AppState {
     db: Mutex<Database>,
 }
 
-async fn create_task(app_state: web::Data<AppState>, task: web::Json<Task>) -> impl Responder {
+async fn upsert_task(app_state: web::Data<AppState>, task: web::Json<Task>) -> impl Responder {
     // lock or secure the app state(db)
     // instead of unwrap we could use expect for better error handling
     let mut db: MutexGuard<Database> = app_state.db.lock().unwrap();
@@ -132,6 +140,46 @@ async fn delete_task(app_state: web::Data<AppState>, task_id: web::Path<u64>) ->
     HttpResponse::Ok().finish()
 }
 
+// USER api methods
+async fn upsert_user(app_state: web::Data<AppState>, user: web::Json<User>) -> impl Responder {
+    let mut db = app_state.db.lock().unwrap();
+
+    db.upsert_user(user.into_inner());
+
+    // save to local db
+    let _ = db.save_to_file();
+
+    HttpResponse::Ok().finish()
+}
+
+async fn get_user_by_name(
+    app_state: web::Data<AppState>,
+    name: web::Path<String>,
+) -> impl Responder {
+    let db = app_state.db.lock().unwrap();
+
+    match db.get_user_by_name(&name.into_inner()) {
+        Some(user) => HttpResponse::Ok().json(user),
+        None => HttpResponse::NotFound().finish(),
+    }
+}
+
+async fn get_all_users(app_state: web::Data<AppState>) -> impl Responder {
+    let db = app_state.db.lock().unwrap();
+
+    let users = db.get_users();
+
+    HttpResponse::Ok().json(users)
+}
+
+async fn delete_user(app_state: web::Data<AppState>, id: web::Path<u64>) -> impl Responder {
+    let mut db = app_state.db.lock().unwrap();
+
+    db.delete_user(&id.into_inner());
+
+    HttpResponse::Ok().finish()
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // fetch an existing database or create one
@@ -157,10 +205,14 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600),
             )
             .app_data(web_data.clone()) //clones only the pointer the actual web_data
-            .route("/task", web::post().to(create_task))
+            .route("/task", web::post().to(upsert_task))
             .route("task/{id}", web::get().to(get_task))
             .route("task", web::get().to(get_all_tasks))
             .route("task/{id}", web::delete().to(delete_task))
+            .route("/user", web::post().to(upsert_user))
+            .route("/user/{name}", web::get().to(get_user_by_name))
+            .route("user/{id}", web::delete().to(delete_user))
+            .route("/user", web::get().to(get_all_users))
     })
     .bind("127.0.0.1:8080")?
     .run()
