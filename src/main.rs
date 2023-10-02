@@ -107,6 +107,31 @@ async fn create_task(app_state: web::Data<AppState>, task: web::Json<Task>) -> i
     HttpResponse::Ok().finish()
 }
 
+async fn get_task(app_state: web::Data<AppState>, id: web::Path<u64>) -> impl Responder {
+    let db = app_state.db.lock().unwrap();
+
+    match db.get_task(&id.into_inner()) {
+        Some(task) => HttpResponse::Ok().json(task),
+        None => HttpResponse::NotFound().finish(),
+    }
+}
+
+async fn get_all_tasks(app_state: web::Data<AppState>) -> impl Responder {
+    let db = app_state.db.lock().unwrap();
+
+    let tasks = db.get_all_tasks();
+
+    HttpResponse::Ok().json(tasks)
+}
+
+async fn delete_task(app_state: web::Data<AppState>, task_id: web::Path<u64>) -> impl Responder {
+    let mut db = app_state.db.lock().unwrap();
+
+    db.delete_task(&task_id.into_inner());
+
+    HttpResponse::Ok().finish()
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // fetch an existing database or create one
@@ -133,6 +158,9 @@ async fn main() -> std::io::Result<()> {
             )
             .app_data(web_data.clone()) //clones only the pointer the actual web_data
             .route("/task", web::post().to(create_task))
+            .route("task/{id}", web::get().to(get_task))
+            .route("task", web::get().to(get_all_tasks))
+            .route("task/{id}", web::delete().to(delete_task))
     })
     .bind("127.0.0.1:8080")?
     .run()
