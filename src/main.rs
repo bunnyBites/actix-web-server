@@ -29,7 +29,6 @@ struct Database {
     users: HashMap<u64, User>,
 }
 
-#[allow(dead_code)]
 impl Database {
     fn new() -> Self {
         Self {
@@ -137,30 +136,30 @@ async fn delete_task(app_state: web::Data<AppState>, task_id: web::Path<u64>) ->
 
     db.delete_task(&task_id.into_inner());
 
-    HttpResponse::Ok().finish()
-}
-
-// USER api methods
-async fn upsert_user(app_state: web::Data<AppState>, user: web::Json<User>) -> impl Responder {
-    let mut db = app_state.db.lock().unwrap();
-
-    db.upsert_user(user.into_inner());
-
-    // save to local db
     let _ = db.save_to_file();
 
     HttpResponse::Ok().finish()
 }
 
-async fn get_user_by_name(
-    app_state: web::Data<AppState>,
-    name: web::Path<String>,
-) -> impl Responder {
+// USER api methods
+async fn register(app_state: web::Data<AppState>, user: web::Json<User>) -> impl Responder {
+    let mut db = app_state.db.lock().unwrap();
+
+    db.upsert_user(user.into_inner());
+
+    let _ = db.save_to_file();
+
+    HttpResponse::Ok().finish()
+}
+
+async fn login(app_state: web::Data<AppState>, user: web::Json<User>) -> impl Responder {
     let db = app_state.db.lock().unwrap();
 
-    match db.get_user_by_name(&name.into_inner()) {
-        Some(user) => HttpResponse::Ok().json(user),
-        None => HttpResponse::NotFound().finish(),
+    match db.get_user_by_name(&user.username) {
+        Some(searched_user) if searched_user.password == user.password => {
+            HttpResponse::Ok().body("Logged In")
+        }
+        _ => HttpResponse::BadRequest().body("Invalid username or password"),
     }
 }
 
@@ -172,10 +171,12 @@ async fn get_all_users(app_state: web::Data<AppState>) -> impl Responder {
     HttpResponse::Ok().json(users)
 }
 
-async fn delete_user(app_state: web::Data<AppState>, id: web::Path<u64>) -> impl Responder {
+async fn delete_user(app_state: web::Data<AppState>, user_id: web::Path<u64>) -> impl Responder {
     let mut db = app_state.db.lock().unwrap();
 
-    db.delete_user(&id.into_inner());
+    db.delete_user(&user_id.into_inner());
+
+    let _ = db.save_to_file();
 
     HttpResponse::Ok().finish()
 }
@@ -209,10 +210,10 @@ async fn main() -> std::io::Result<()> {
             .route("task/{id}", web::get().to(get_task))
             .route("task", web::get().to(get_all_tasks))
             .route("task/{id}", web::delete().to(delete_task))
-            .route("/user", web::post().to(upsert_user))
-            .route("/user/{name}", web::get().to(get_user_by_name))
-            .route("user/{id}", web::delete().to(delete_user))
             .route("/user", web::get().to(get_all_users))
+            .route("/user/{id}", web::delete().to(delete_user))
+            .route("/register", web::post().to(register))
+            .route("/login", web::post().to(login))
     })
     .bind("127.0.0.1:8080")?
     .run()
