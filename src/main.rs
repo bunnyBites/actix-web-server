@@ -1,8 +1,13 @@
+use actix_cors::Cors;
+use actix_web::{http::header, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::fs;
 use std::io::Write;
-// use actix_web::{ get, post, App, Responder, HttpResponse, HttpServer, web };
+use std::{
+    collections::HashMap,
+    fs,
+    sync::{Mutex, MutexGuard},
+    vec,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Task {
@@ -24,6 +29,7 @@ struct Database {
     users: HashMap<u64, User>,
 }
 
+#[allow(dead_code)]
 impl Database {
     fn new() -> Self {
         Self {
@@ -65,7 +71,7 @@ impl Database {
 
         // write the db_string to a file
         let mut file = fs::File::create("database.json")?;
-        file.write_all(db_string.as_bytes()); //need to store the file in bytes
+        let _ = file.write_all(db_string.as_bytes()); //need to store the file in bytes
 
         Ok(())
     }
@@ -81,6 +87,54 @@ impl Database {
     }
 }
 
-fn main() {
-    println!("Hello, world!");
+struct AppState {
+    db: Mutex<Database>,
+}
+
+async fn create_task(app_state: web::Data<AppState>, task: web::Json<Task>) -> impl Responder {
+    // lock or secure the app state(db)
+    // instead of unwrap we could use expect for better error handling
+    let mut db: MutexGuard<Database> = app_state.db.lock().unwrap();
+
+    // insert task to the availed db
+    // into_inner is used to unwrap the task from JSON
+    db.upsert_task(task.into_inner());
+
+    // save the updated db to our local database file "database.json"
+    let _ = db.save_to_file();
+
+    // complete the http response
+    HttpResponse::Ok().finish()
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    // fetch an existing database or create one
+    let db: Database = match Database::read_from_file() {
+        Ok(db) => db,
+        Err(_) => Database::new(),
+    };
+
+    // create web app data
+    let web_data = web::Data::new(AppState { db: Mutex::new(db) });
+
+    HttpServer::new(move || {
+        App::new()
+            .wrap(
+                Cors::permissive()
+                    .allowed_origin_fn(|origin, _req_head| {
+                        origin.as_bytes().starts_with(b"http://localhost") || origin == "null"
+                    })
+                    .allowed_methods(vec!["GET", "POST", "DELETE", "PUT"])
+                    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+                    .allowed_header(header::CONTENT_TYPE)
+                    .supports_credentials()
+                    .max_age(3600),
+            )
+            .app_data(web_data.clone()) //clones only the pointer the actual web_data
+            .route("/task", web::post().to(create_task))
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }
