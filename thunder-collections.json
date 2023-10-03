@@ -1,0 +1,195 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "actix-user-task-web-server-collections",
+    "dateExported": "2023-10-03T06:26:23.614Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "910e4f73-b611-41d1-9cf8-263268cf81ab",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Register User",
+            "url": "http://localhost:8080/register",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-10-03T06:23:01.062Z",
+            "modified": "2023-10-03T06:23:01.062Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"id\": 2,\n  \"username\": \"bunny\",\n  \"password\": \"1234\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "5d56448e-f68a-4229-a62b-fb228315d697",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Login User",
+            "url": "http://localhost:8080/login",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-10-03T06:23:16.147Z",
+            "modified": "2023-10-03T06:23:16.147Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"id\": 1,\n  \"username\": \"REX\",\n  \"password\": \"2311\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "3bb60372-66bd-478d-b506-6b956e2f17e2",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Get All Users",
+            "url": "http://localhost:8080/user",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2023-10-03T06:23:34.428Z",
+            "modified": "2023-10-03T06:23:34.428Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "d7588cd7-ad77-4d42-bdf9-a7014d7cf6bd",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Get User by Name",
+            "url": "http://localhost:8080/user/bunny",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2023-10-03T06:23:50.272Z",
+            "modified": "2023-10-03T06:23:50.273Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "bc8fc20c-eac9-425f-93d4-a935e034e5a7",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Delete User by Id",
+            "url": "http://localhost:8080/user/1",
+            "method": "DELETE",
+            "sortNum": 50000,
+            "created": "2023-10-03T06:24:06.200Z",
+            "modified": "2023-10-03T06:24:06.200Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "2606be34-b4e2-43c0-9aad-63a00e54d69f",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Delete Task by Id",
+            "url": "http://localhost:8080/task/1",
+            "method": "DELETE",
+            "sortNum": 60000,
+            "created": "2023-10-03T06:24:18.687Z",
+            "modified": "2023-10-03T06:24:18.687Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "418dc240-60c4-4a82-bd87-806898e9d603",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Get All Tasks",
+            "url": "http://localhost:8080/task",
+            "method": "GET",
+            "sortNum": 70000,
+            "created": "2023-10-03T06:24:35.380Z",
+            "modified": "2023-10-03T06:24:35.380Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "06549627-935e-4a1b-97fb-957715e9f2ec",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Get Task by Id",
+            "url": "http://localhost:8080/task/1",
+            "method": "GET",
+            "sortNum": 80000,
+            "created": "2023-10-03T06:25:01.381Z",
+            "modified": "2023-10-03T06:25:01.381Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "858d2044-182b-4ce9-ab5c-668f704d14ea",
+            "colId": "d41b33c7-fafa-4add-b3ea-9f2401659de1",
+            "containerId": "",
+            "name": "Create Task",
+            "url": "http://localhost:8080/task",
+            "method": "POST",
+            "sortNum": 90000,
+            "created": "2023-10-03T06:25:15.642Z",
+            "modified": "2023-10-03T06:25:15.642Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"id\": 1,\n  \"name\": \"Welcome to my show\",\n  \"completed\": false\n}",
+                "form": []
+            },
+            "tests": []
+        }
+    ]
+}
